@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Marketplace</title>
+	<meta charset="UTF-8">
+	<meta name="format-detection" content="telephone=no">
+	<!-- <style>body{opacity: 0;}</style> -->
+	<link rel="stylesheet" href="css/style.min.css?_v=20230212144858">
+	<link rel="shortcut icon" href="favicon.ico">
+	<!-- <meta name="robots" content="noindex, nofollow"> -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Стили для прелоадера -->
+	<style class="preloader-style">
+		.preloader {
+			pointer-events: none;
+			z-index: 1000;
+			position: fixed;
+			width: 100vw;
+			height: 100vh;
+			top: 0;
+			left: 0;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			background: linear-gradient(45deg, rgb(21, 19, 21) 10%, rgb(90, 43, 96) 100%);
+		}
+
+		.preloader * {
+			box-sizing: border-box;
+		}
+
+		.preloader__body {
+			padding: 0.93rem;
+			display: flex;
+			flex-direction: column;
+			position: relative;
+			width: 280px;
+			height: 280px;
+		}
+
+		.preloader__one,
+		.preloader__two {
+			position: absolute;
+			width: 175px;
+			height: 175px;
+			border-radius: 50%;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			margin: auto;
+		}
+
+		.preloader__one {
+			animation: spin1 2.3s infinite linear;
+		}
+
+		.preloader__two {
+			/* transform: rotate(45deg); */
+			animation: spin2 2.3s infinite linear;
+		}
+
+		.preloader__one_one,
+		.preloader__two_five {
+			border-top: 5px solid transparent;
+		}
+
+		.preloader__one_two,
+		.preloader__two_six {
+			border-right: 5px solid transparent;
+		}
+
+		.preloader__one_three,
+		.preloader__two_seven {
+			border-bottom: 5px solid transparent;
+		}
+
+		.preloader__one_four,
+		.preloader__two_eight {
+			border-left: 5px solid transparent;
+		}
+
+		.preloader__one_one {
+			top: -100px;
+		}
+
+		.preloader__one_two {
+			right: -100px;
+		}
+
+		.preloader__one_three {
+			bottom: -100px;
+		}
+
+		.preloader__one_four {
+			left: -100px;
+		}
+
+		.preloader__two_five {
+			right: -100px;
+			bottom: 100px;
+		}
+
+		.preloader__two_six {
+			left: 100px;
+			top: 100px;
+		}
+
+		.preloader__two_seven {
+			left: 100px;
+			top: 100px;
+		}
+
+		.preloader__two_eight {
+			right: 100px;
+			top: 100px;
+		}
+
+		@keyframes spin1 {
+			from {
+				transform: rotate(0deg);
+			}
+
+			to {
+				transform: rotate(360deg);
+			}
+
+			0% {
+				border-color: #968fa4;
+			}
+
+			50% {
+				border-color: #927aaa1d;
+			}
+
+			100% {
+				border-color: #817892;
+			}
+		}
+
+		@keyframes spin2 {
+			from {
+				transform: rotate(360deg);
+			}
+
+			to {
+				transform: rotate(0deg);
+			}
+
+			0% {
+				border-color: #321d5e;
+			}
+
+			50% {
+				border-color: #927aaa1d;
+			}
+
+			100% {
+				border-color: #442f6f;
+			}
+		}
+
+		.preloader__counter {
+			font-size: 35px;
+			position: absolute;
+			font-weight: 900;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			color: rgb(0, 0, 0);
+			z-index: 2222222;
+			font-family: sans-serif;
+		}
+
+		.preloader__line span {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			height: 3px;
+			background-color: rgba(67, 9, 85, 0.516);
+			border-radius: 25px;
+			transition: width 0.3s ease 0s;
+		}
+
+
+		.lock body {
+			overflow: hidden;
+			touch-action: none;
+			overscroll-behavior: none;
+		}
+
+		.wrapper {
+			opacity: 0;
+			visibility: hidden;
+		}
+
+		.loading .preloader {
+			opacity: 1;
+			visibility: visible;
+		}
+
+		.loaded .preloader {
+			opacity: 0;
+			visibility: hidden;
+			transition: all 0.5s ease 0s;
+		}
+
+		.loaded .wrapper {
+			transition: opacity 0.5s ease 0s;
+			opacity: 1;
+			visibility: visible;
+		}
+	</style>
+	<!-- Скрипт прелоадера -->
+	<script id="preloader">
+		(function() {
+			const preloaderContainer = document.querySelector('#preloader');
+			let preloader, preloaderBody, showPecentLoad, showLineLoad;
+			const htmlDocument = document.documentElement;
+			const settings = {
+				// Задержка перед удалением прелоадера из html после окончания загрузки
+				delayRemovePreloader: 500,
+				// Функціонал відсоткового відображення завантаження
+				counter: true,
+				// Функционал процентного отображения загрузки
+				line: false,
+				// Функционал кастомного отображения разных элементов (можно редактировать) – для включения перевести init в позицию true.
+				custom: {
+					init: true,
+					// Элементы, которые нужно добавлять в preloader__body
+					body: `
+							<div class="preloader__one preloader__one_one"></div>
+							<div class="preloader__one preloader__one_two"></div>
+							<div class="preloader__one preloader__one_three"></div>
+							<div class="preloader__one preloader__one_four"></div>
+							<div class="preloader__two preloader__two_five"></div>
+							<div class="preloader__two preloader__two_six"></div>
+							<div class="preloader__two preloader__two_seven"></div>
+							<div class="preloader__two preloader__two_eight"></div>
+							`
+				},
+			};
+			const checkBodyinterval = setInterval(() => {
+				if (document.body) {
+					clearInterval(checkBodyinterval);
+					const preloaderTemplate = `
+								<div class="preloader">
+									<div class="preloader__body">
+										${settings.custom.init ? settings.custom.body : ''}
+										${settings.counter ? '<div class="preloader__counter">0%</div>' : ''}
+										${settings.line ? '<div class="preloader__line"><span></span></div>' : ''}
+									</div>
+								</div>
+							`;
+					htmlDocument.insertAdjacentHTML("beforeend", preloaderTemplate);
+					preloader = document.querySelector('.preloader');
+					preloaderBody = preloader.querySelector('.preloader__body');
+					showPecentLoad = document.querySelector('.preloader__counter');
+					showLineLoad = document.querySelector('.preloader__line span');
+				}
+			}, 10);
+			const checkScriptsInterval = setInterval(() => {
+				const mainScriptsTag = document.querySelector('[data-main-script]');
+				if (mainScriptsTag) {
+					clearInterval(checkScriptsInterval);
+					let preloaderImages = document.querySelectorAll('img');
+					const preloaderStyle = document.querySelector('.preloader-style');
+					if (preloaderImages.length) {
+						const intervalDelayCuonter = 4 * preloaderImages.length < 40 ? 4 * preloaderImages.length : 40;
+						let imagesLoadedCount = counter = progress = 0;
+						htmlDocument.classList.add('loading');
+						htmlDocument.classList.add('lock');
+						window.addEventListener("load", () => htmlDocument.classList.add('download-done'));
+						preloaderImages.forEach(preloaderImage => {
+							const imgClone = document.createElement('img');
+							if (imgClone) {
+								imgClone.onload = imageLoaded;
+								imgClone.onerror = imageLoaded;
+								preloaderImage.dataset.src ? imgClone.src = preloaderImage.dataset.src : imgClone.src = preloaderImage.src;
+							}
+						});
+
+						function setValueProgress(progress) {
+							showPecentLoad ? showPecentLoad.innerText = `${progress}%` : null;
+							showLineLoad ? showLineLoad.style.width = `${progress}%` : null;
+						}
+						showPecentLoad ? setValueProgress(progress) : null;
+
+						function imageLoaded() {
+							imagesLoadedCount++;
+							progress = Math.round((100 / preloaderImages.length) * imagesLoadedCount);
+							const intervalId = setInterval(() => {
+								counter >= progress ? clearInterval(intervalId) : setValueProgress(++counter);
+								counter >= 100 ? addLoadedClass() : null;
+							}, intervalDelayCuonter);
+						}
+
+						function addLoadedClass() {
+							if (this.isRun == true) return;
+							this.isRun = true;
+
+							let timer = setInterval(() => {
+								if (htmlDocument.closest('.download-done')) {
+									htmlDocument.classList.remove('lock');
+									htmlDocument.classList.remove('loading');
+									setTimeout(() => {
+										htmlDocument.classList.remove('download-done');
+										htmlDocument.classList.add('loaded');
+									}, settings.delayRemovePreloader >= 500 ? settings.delayRemovePreloader - 500 : 0);
+									const intervalRemovePreloader = setInterval(() => {
+										preloader.remove();
+										if (preloaderStyle) {
+											preloaderStyle.remove();
+										}
+										clearInterval(intervalRemovePreloader);
+										clearInterval(timer);
+										preloaderContainer.remove();
+										mainScriptsTag.removeAttribute('data-main-script');
+									}, settings.delayRemovePreloader);
+								} else {
+									return;
+								}
+							}, 300);
+						}
+					} else {
+						if (preloaderStyle) {
+							preloaderStyle.remove();
+						}
+						preloaderContainer.remove();
+					}
+				}
+			}, 10);
+		})();
+	</script>
+</head>
+
+<body>
+	<div class="wrapper">
+		<header class="header">
+			<div class="header__inner">
+				<div class="header__body">
+					<a href="index.html" class="header__logo">
+						<img src="img/icons/logo.svg" alt="logo">
+					</a>
+					<div class="header__menu menu">
+						<nav class="menu__body">
+							<ul class="menu__list">
+								<li class="menu__item"><a href="index.html" class="menu__link">Marketplace</a></li>
+								<li class="menu__item"><a href="rankings.html" class="menu__link">Rankings</a></li>
+								<li class="menu__item"><a href="connect.html" class="menu__link">Connect a wallet</a></li>
+							</ul>
+						</nav>
+					</div>
+					<a data-da=".menu__list,840" href="form.html" class="header__btn _icon-user">Sign Up</a>
+					<button type="button" class="header__icon icon-menu"><span></span></button>
+				</div>
+			</div>
+		</header>
+
+		<main class="page">
+			<section class="page__discover discover">
+				<div class="discover__container">
+					<div class="discover__inner">
+						<div class="discover__body">
+							<h1 class="discover__title">Discover digital art & Collect NFTs</h1>
+							<div class="discover__text">
+								<p>NFT marketplace UI created with Anima for Figma. Collect, buy and sell art from more than 20k
+									NFT artists.</p>
+							</div>
+							<div data-da=".discover__inner,767.98,2" class="discover__btn">
+								<a href="#" class="discover__link _icon-rocket">Get Started</a>
+							</div>
+							<div class="discover__total total-block">
+								<div data-watch data-watch-threshold="0.5" data-da=".discover__inner,767.98" class="total-block__inner">
+									<div class="total-block__column">
+										<div data-watch class="total-block__number">
+											<span data-digits-counter data-digits-counter-speed="1700">240</span><span>k+</span>
+										</div>
+										<div class="total-block__name">Total Sale
+										</div>
+									</div>
+									<div class="total-block__column">
+										<div data-watch class="total-block__number">
+											<span data-digits-counter data-digits-counter-speed="1700">100</span><span>k+</span>
+										</div>
+										<div class="total-block__name">Auctions
+										</div>
+									</div>
+									<div class="total-block__column">
+										<div data-watch class="total-block__number">
+											<span data-digits-counter data-digits-counter-speed="1700">240</span><span>k+</span>
+										</div>
+										<div class="total-block__name">Artists
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="discover__imadges imadges-discover">
+							<div class="imadges-discover__picture-ibg">
+								<picture><source srcset="img/discover.webp" type="image/webp"><img src="img/discover.png" alt="picture"></picture>
+							</div>
+							<div class="imadges-discover__actions avatar-discover">
+								<div class="avatar-discover__text">
+									<p>Space Walking</p>
+								</div>
+								<div class="avatar-discover__ava">
+									<a href="#" class="avatar-discover__logo">
+										<picture><source srcset="img/avatar-dis.webp" type="image/webp"><img src="img/avatar-dis.png" alt="imadges-discover"></picture>
+									</a>
+									<div class="avatar-discover__name">Animakid</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section class="page__trending trending">
+				<div class="trending__container">
+					<h2 data-watch data-watch-threshold="0.3" class="trending__title title">Trending Collection</h2>
+					<div data-watch data-watch-threshold="0.3" class="trending__subtitle subtitle">Checkout our weekly
+						updated trending collection.</div>
+					<div class="trending__slider swiper">
+						<div class="trending__wrapper swiper-wrapper">
+							<div class="trending__slide swiper-slide">
+								<div class="trending__column column-trending">
+									<a href="" class="column-trending__img-ibg">
+										<picture><source srcset="img/trending/1-big.webp" type="image/webp"><img src="img/trending/1-big.png" alt="img"></picture>
+									</a>
+									<div class="column-trending__inner">
+										<div class="column-trending__item">
+											<a href="" class="column-trending__picture-ibg">
+												<picture><source srcset="img/trending/column1sm1.webp" type="image/webp"><img src="img/trending/column1sm1.png" alt=""></picture>
+											</a>
+											<a href="" class="column-trending__picture-ibg">
+												<picture><source srcset="img/trending/column1sm2.webp" type="image/webp"><img src="img/trending/column1sm2.png" alt=""></picture>
+											</a>
+											<a href="" class="column-trending__picture-ibg">
+												<picture><source srcset="img/trending/number.webp" type="image/webp"><img src="img/trending/number.png" alt=""></picture>
+											</a>
+										</div>
+									</div>
+									<div class="column-trending__name avatar-discover">
+										<div class="avatar-discover__text">
+											<p>DSGN Animals</p>
+										</div>
+										<div class="avatar-discover__ava">
+											<a href="#" class="avatar-discover__logo">
+												<picture><source srcset="img/avatar/6.webp" type="image/webp"><img src="img/avatar/6.png" alt="imadges-discover"></picture>
+											</a>
+											<div class="avatar-discover__name">MrFox</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="trending__slide swiper-slide">
+								<div class="trending__column column-trending">
+									<a href="" class="column-trending__img-ibg">
+										<picture><source srcset="img/trending/2-big.webp" type="image/webp"><img src="img/trending/2-big.png" alt="img"></picture>
+									</a>
+									<div class="column-trending__inner">
+										<div class="column-trending__item">
+											<a href="" class="column-trending__picture-ibg">
+												<picture><source srcset="img/trending/column2sm1.webp" type="image/webp"><img src="img/trending/column2sm1.png" alt=""></picture>
+											</a>
+											<a href="" class="column-trending__picture-ibg">
+												<picture><source srcset="img/trending/column2sm2.webp" type="image/webp"><img src="img/trending/column2sm2.png" alt=""></picture>
+											</a>
+											<a href="" class="column-trending__picture-ibg">
+												<picture><source srcset="img/trending/number.webp" type="image/webp"><img src="img/trending/number.png" alt=""></picture>
+											</a>
+										</div>
+									</div>
+									<div class="column-trending__name avatar-discover">
+										<div class="avatar-discover__text">
+											<p>Magic Mushrooms</p>
+										</div>
+										<div class="avatar-discover__ava">
+											<a href="#" class="avatar-discover__logo">
+												<picture><source srcset="img/avatar/7.webp" type="image/webp"><img src="img/avatar/7.png" alt="imadges-discover"></picture>
+											</a>
+											<div class="avatar-discover__name">Shroomie</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="trending__slide swiper-slide">
+								<div class="trending__column column-trending">
+									<a href="" class="column-trending__img-ibg">
+										<picture><source srcset="img/trending/3-big.webp" type="image/webp"><img src="img/trending/3-big.png" alt="img"></picture>
+									</a>
+									<div class="column-trending__inner">
+										<div class="column-trending__item">
+											<a href="" class="column-trending__picture-ibg">
+												<picture><source srcset="img/trending/column3sm1.webp" type="image/webp"><img src="img/trending/column3sm1.png" alt=""></picture>
+											</a>
+											<a href="" class="column-trending__picture-ibg">
+												<picture><source srcset="img/trending/column3sm2.webp" type="image/webp"><img src="img/trending/column3sm2.png" alt=""></picture>
+											</a>
+											<a href="" class="column-trending__picture-ibg">
+												<picture><source srcset="img/trending/number.webp" type="image/webp"><img src="img/trending/number.png" alt=""></picture>
+											</a>
+										</div>
+									</div>
+									<div class="column-trending__name avatar-discover">
+										<div class="avatar-discover__text">
+											<p>Disco Machines</p>
+										</div>
+										<div class="avatar-discover__ava">
+											<a href="#" class="avatar-discover__logo">
+												<picture><source srcset="img/avatar/12.webp" type="image/webp"><img src="img/avatar/12.png" alt="imadges-discover"></picture>
+											</a>
+											<div class="avatar-discover__name">BeKind2Robots</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section class="page__creators creators">
+				<div class="creators__container">
+					<div data-watch data-watch-threshold="0.3" class="creators__header header-block">
+						<div class="header-block__text">
+							<h2 data-watch data-watch-threshold="0.3" class="header-block__title title">Top creators</h2>
+							<div data-watch data-watch-threshold="0.3" class="header-block__subtitle subtitle">Checkout Top Rated Creators on the NFT Marketplace
+							</div>
+						</div>
+						<div data-da=".creators__inner,700" class="header-block__btn">
+							<a href="rankings.html" class="header-block__link _icon-rocket">View Rankings</a>
+						</div>
+					</div>
+					<div class="creators__inner">
+						<a href="#" class="creators__cards cards-creators">
+							<div class="cards-creators__element">1</div>
+							<div class="cards-creators__img-ibg">
+								<picture><source srcset="img/avatar/1.webp" type="image/webp"><img src="img/avatar/1.png" alt="avatar"></picture>
+							</div>
+							<div class="cards-creators__text">
+								<div class="cards-creators__title">Keepitreal</div>
+								<div class="cards-creators__total total">
+									<div class="total__sale">Total Sales:</div>
+									<div class="total__num">34.53 ETH</div>
+								</div>
+							</div>
+						</a>
+						<a href="#" class="creators__cards cards-creators">
+							<div class="cards-creators__element">2</div>
+							<div class="cards-creators__img-ibg">
+								<picture><source srcset="img/avatar/2.webp" type="image/webp"><img src="img/avatar/2.png" alt="avatar"></picture>
+							</div>
+							<div class="cards-creators__text">
+								<div class="cards-creators__title">DigiLab</div>
+								<div class="cards-creators__total total">
+									<div class="total__sale">Total Sales:</div>
+									<div class="total__num">34.53 ETH</div>
+								</div>
+							</div>
+						</a>
+						<a href="#" class="creators__cards cards-creators">
+							<div class="cards-creators__element">3</div>
+							<div class="cards-creators__img-ibg">
+								<picture><source srcset="img/avatar/3.webp" type="image/webp"><img src="img/avatar/3.png" alt="avatar"></picture>
+							</div>
+							<div class="cards-creators__text">
+								<div class="cards-creators__title">GravityOne</div>
+								<div class="cards-creators__total total">
+									<div class="total__sale">Total Sales:</div>
+									<div class="total__num">34.53 ETH</div>
+								</div>
+							</div>
+						</a>
+						<a href="#" class="creators__cards cards-creators">
+							<div class="cards-creators__element">4</div>
+							<div class="cards-creators__img-ibg">
+								<picture><source srcset="img/avatar/4.webp" type="image/webp"><img src="img/avatar/4.png" alt="avatar"></picture>
+							</div>
+							<div class="cards-creators__text">
+								<div class="cards-creators__title">Juanie</div>
+								<div class="cards-creators__total total">
+									<div class="total__sale">Total Sales:</div>
+									<div class="total__num">34.53 ETH</div>
+								</div>
+							</div>
+						</a>
+						<a href="#" class="creators__cards cards-creators">
+							<div class="cards-creators__element">5</div>
+							<div class="cards-creators__img-ibg">
+								<picture><source srcset="img/avatar/5.webp" type="image/webp"><img src="img/avatar/5.png" alt="avatar"></picture>
+							</div>
+							<div class="cards-creators__text">
+								<div class="cards-creators__title">BlueWhale</div>
+								<div class="cards-creators__total total">
+									<div class="total__sale">Total Sales:</div>
+									<div class="total__num">34.53 ETH</div>
+								</div>
+							</div>
+						</a>
+						<a href="#" class="creators__cards cards-creators">
+							<div class="cards-creators__element">6</div>
+							<div class="cards-creators__img-ibg">
+								<picture><source srcset="img/avatar/6.webp" type="image/webp"><img src="img/avatar/6.png" alt="avatar"></picture>
+							</div>
+							<div class="cards-creators__text">
+								<div class="cards-creators__title">mr fox</div>
+								<div class="cards-creators__total total">
+									<div class="total__sale">Total Sales:</div>
+									<div class="total__num">34.53 ETH</div>
+								</div>
+							</div>
+						</a>
+						<a href="#" class="creators__cards cards-creators creators__cards--non">
+							<div class="cards-creators__element">7</div>
+							<div class="cards-creators__img-ibg">
+								<picture><source srcset="img/avatar/7.webp" type="image/webp"><img src="img/avatar/7.png" alt="avatar"></picture>
+							</div>
+							<div class="cards-creators__text">
+								<div class="cards-creators__title">Shroomie</div>
+								<div class="cards-creators__total total">
+									<div class="total__sale">Total Sales:</div>
+									<div class="total__num">34.53 ETH</div>
+								</div>
+							</div>
+						</a>
+						<a href="#" class="creators__cards cards-creators creators__cards--non">
+							<div class="cards-creators__element">8</div>
+							<div class="cards-creators__img-ibg">
+								<picture><source srcset="img/avatar/8.webp" type="image/webp"><img src="img/avatar/8.png" alt="avatar"></picture>
+							</div>
+							<div class="cards-creators__text">
+								<div class="cards-creators__title">robotica</div>
+								<div class="cards-creators__total total">
+									<div class="total__sale">Total Sales:</div>
+									<div class="total__num">34.53 ETH</div>
+								</div>
+							</div>
+						</a>
+						<a href="#" class="creators__cards cards-creators creators__cards--non">
+							<div class="cards-creators__element">9</div>
+							<div class="cards-creators__img-ibg">
+								<picture><source srcset="img/avatar/9.webp" type="image/webp"><img src="img/avatar/9.png" alt="avatar"></picture>
+							</div>
+							<div class="cards-creators__text">
+								<div class="cards-creators__title">RustyRobot</div>
+								<div class="cards-creators__total total">
+									<div class="total__sale">Total Sales:</div>
+									<div class="total__num">34.53 ETH</div>
+								</div>
+							</div>
+						</a>
+						<a href="#" class="creators__cards cards-creators creators__cards--non">
+							<div class="cards-creators__element">10</div>
+							<div class="cards-creators__img-ibg">
+								<picture><source srcset="img/avatar/14.webp" type="image/webp"><img src="img/avatar/14.png" alt="avatar"></picture>
+							</div>
+							<div class="cards-creators__text">
+								<div class="cards-creators__title">animakid</div>
+								<div class="cards-creators__total total">
+									<div class="total__sale">Total Sales:</div>
+									<div class="total__num">34.53 ETH</div>
+								</div>
+							</div>
+						</a>
+						<a href="#" class="creators__cards cards-creators creators__cards--non">
+							<div class="cards-creators__element">11</div>
+							<div class="cards-creators__img-ibg">
+								<picture><source srcset="img/avatar/15.webp" type="image/webp"><img src="img/avatar/15.png" alt="avatar"></picture>
+							</div>
+							<div class="cards-creators__text">
+								<div class="cards-creators__title">Dotgu</div>
+								<div class="cards-creators__total total">
+									<div class="total__sale">Total Sales:</div>
+									<div class="total__num">34.53 ETH</div>
+								</div>
+							</div>
+						</a>
+						<a href="#" class="creators__cards cards-creators creators__cards--non">
+							<div class="cards-creators__element">12</div>
+							<div class="cards-creators__img-ibg">
+								<picture><source srcset="img/avatar/17.webp" type="image/webp"><img src="img/avatar/17.png" alt="avatar"></picture>
+							</div>
+							<div class="cards-creators__text">
+								<div class="cards-creators__title">Ghiblier</div>
+								<div class="cards-creators__total total">
+									<div class="total__sale">Total Sales:</div>
+									<div class="total__num">34.53 ETH</div>
+								</div>
+							</div>
+						</a>
+					</div>
+				</div>
+			</section>
+			<section class="page__browse browse">
+				<div class="browse__container">
+					<h2 data-watch data-watch-threshold="0.3" class="browse__title title">Browse Categories</h2>
+					<div class="browse__body">
+						<a href="created.html" class="browse__cards cards-browse">
+							<div class="cards-browse__img-ibg cards-browse__img-ibg--1">
+								<picture><source srcset="img/browse/1.webp" type="image/webp"><img src="img/browse/1.png" alt="cards-browse"></picture>
+							</div>
+							<div class="cards-browse__title">Art</div>
+						</a>
+						<a href="created.html" class="browse__cards cards-browse">
+							<div class="cards-browse__img-ibg cards-browse__img-ibg--2">
+								<picture><source srcset="img/browse/2.webp" type="image/webp"><img src="img/browse/2.png" alt="cards-browse"></picture>
+							</div>
+							<div class="cards-browse__title">Collectibles</div>
+						</a>
+						<a href="created.html" class="browse__cards cards-browse">
+							<div class="cards-browse__img-ibg cards-browse__img-ibg--3">
+								<picture><source srcset="img/browse/3.webp" type="image/webp"><img src="img/browse/3.png" alt="cards-browse"></picture>
+							</div>
+							<div class="cards-browse__title">Music</div>
+						</a>
+						<a href="created.html" class="browse__cards cards-browse">
+							<div class="cards-browse__img-ibg cards-browse__img-ibg--4">
+								<picture><source srcset="img/browse/4.webp" type="image/webp"><img src="img/browse/4.png" alt="cards-browse"></picture>
+							</div>
+							<div class="cards-browse__title">Photography</div>
+						</a>
+						<a href="created.html" class="browse__cards cards-browse">
+							<div class="cards-browse__img-ibg cards-browse__img-ibg--5">
+								<picture><source srcset="img/browse/5.webp" type="image/webp"><img src="img/browse/5.png" alt="cards-browse"></picture>
+							</div>
+							<div class="cards-browse__title">Video</div>
+						</a>
+						<a href="created.html" class="browse__cards cards-browse">
+							<div class="cards-browse__img-ibg cards-browse__img-ibg--6">
+								<picture><source srcset="img/browse/6.webp" type="image/webp"><img src="img/browse/6.png" alt="cards-browse"></picture>
+							</div>
+							<div class="cards-browse__title">Utility</div>
+						</a>
+						<a href="created.html" class="browse__cards cards-browse">
+							<div class="cards-browse__img-ibg cards-browse__img-ibg--7">
+								<picture><source srcset="img/browse/7.webp" type="image/webp"><img src="img/browse/7.png" alt="cards-browse"></picture>
+							</div>
+							<div class="cards-browse__title">Sport</div>
+						</a>
+						<a href="created.html" class="browse__cards cards-browse">
+							<div class="cards-browse__img-ibg cards-browse__img-ibg--8">
+								<picture><source srcset="img/browse/8.webp" type="image/webp"><img src="img/browse/8.png" alt="cards-browse"></picture>
+							</div>
+							<div class="cards-browse__title">Virtual Worlds</div>
+						</a>
+					</div>
+				</div>
+			</section>
+			<section class="page__nft-more nft-more">
+				<div class="nft-more__container">
+					<div data-watch data-watch-threshold="0.3" class="nft-more__header header-block">
+						<div class="header-block__text">
+							<h2 data-watch data-watch-threshold="0.3" class="header-block__title title">Discover More NFTs</h2>
+							<div data-watch data-watch-threshold="0.3" class="header-block__subtitle subtitle">Explore new trending NFTs</div>
+						</div>
+						<div data-da=".nft-more__container,700" class="header-block__btn">
+							<a href="browse.html" class="header-block__link _icon-eye">See All</a>
+						</div>
+					</div>
+					<div class="nft-more__body body-more-nft">
+						<div class="body-more-nft__cards">
+							<div class="body-more-nft__img-ibg">
+								<picture><source srcset="img/more-nft/1.webp" type="image/webp"><img src="img/more-nft/1.png" alt="more-nft"></picture>
+							</div>
+							<div class="body-more-nft__inner">
+								<div class="body-more-nft__name avatar-discover">
+									<div class="avatar-discover__text">
+										<p>Distant Galaxy</p>
+									</div>
+									<div class="avatar-discover__ava">
+										<a href="#" class="avatar-discover__logo">
+											<picture><source srcset="img/avatar/16.webp" type="image/webp"><img src="img/avatar/16.png" alt="imadges-discover"></picture>
+										</a>
+										<div class="avatar-discover__name">MoonDancer</div>
+									</div>
+								</div>
+								<div class="body-more-nft__total total">
+									<div class="total__body">
+										<div class="total__sale">Price</div>
+										<div class="total__num">1.63 ETH</div>
+									</div>
+									<div class="total__body">
+										<div class="total__sale">Highest Bid</div>
+										<div class="total__num">0.33 wETH</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="body-more-nft__cards">
+							<div class="body-more-nft__img-ibg">
+								<picture><source srcset="img/more-nft/2.webp" type="image/webp"><img src="img/more-nft/2.png" alt="more-nft"></picture>
+							</div>
+							<div class="body-more-nft__inner">
+								<div class="body-more-nft__name avatar-discover">
+									<div class="avatar-discover__text">
+										<p>Life On Edena</p>
+									</div>
+									<div class="avatar-discover__ava">
+										<a href="#" class="avatar-discover__logo">
+											<picture><source srcset="img/avatar/10.webp" type="image/webp"><img src="img/avatar/10.png" alt="imadges-discover"></picture>
+										</a>
+										<div class="avatar-discover__name">NebulaKid</div>
+									</div>
+								</div>
+								<div class="body-more-nft__total total">
+									<div class="total__body">
+										<div class="total__sale">Price</div>
+										<div class="total__num">1.63 ETH</div>
+									</div>
+									<div class="total__body">
+										<div class="total__sale">Highest Bid</div>
+										<div class="total__num">0.33 wETH</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="body-more-nft__cards body-more-nft__cards--3">
+							<div class="body-more-nft__img-ibg">
+								<picture><source srcset="img/more-nft/3.webp" type="image/webp"><img src="img/more-nft/3.png" alt=""></picture>
+							</div>
+							<div class="body-more-nft__inner">
+								<div class="body-more-nft__name avatar-discover">
+									<div class="avatar-discover__text">
+										<p>AstroFiction</p>
+									</div>
+									<div class="avatar-discover__ava">
+										<a href="#" class="avatar-discover__logo">
+											<picture><source srcset="img/avatar/15.webp" type="image/webp"><img src="img/avatar/15.png" alt="imadges-discover"></picture>
+										</a>
+										<div class="avatar-discover__name">Spaceone</div>
+									</div>
+								</div>
+								<div class="body-more-nft__total total">
+									<div class="total__body">
+										<div class="total__sale">Price</div>
+										<div class="total__num">1.63 ETH</div>
+									</div>
+									<div class="total__body">
+										<div class="total__sale">Highest Bid</div>
+										<div class="total__num">0.33 wETH</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section class="page__mashrooms mashrooms">
+				<div class="mashrooms__container">
+					<div class="mashrooms__img-ibg">
+						<picture><source srcset="img/works/bgmshrms.webp" type="image/webp"><img src="img/works/bgmshrms.png" alt=""></picture>
+					</div>
+					<div data-watch data-watch-threshold="0.3" data-watch-once class="mashrooms__body">
+						<div class="mashrooms__inner">
+							<div class="mashrooms__label">
+								<a href="#" class="mashrooms__logo">
+									<picture><source srcset="img/avatar/7.webp" type="image/webp"><img src="img/avatar/7.png" alt="imadges-discover"></picture> Shroomie
+								</a>
+								<!-- <div class="mashrooms__name"></div> -->
+							</div>
+							<h2 class="mashrooms__title">Magic Mashrooms</h2>
+							<div data-da=".mashrooms__body,700" class="mashrooms__btn">
+								<a href="orbitians.html" class="mashrooms__link _icon-eye">See NFT</a>
+							</div>
+						</div>
+						<div class="mashrooms__clock clock">
+							<div class="clock__body">
+								<div class="clock__text">Auction ends in:</div>
+								<div class="clock__num" id="clock"></div>
+								<div class="clock__column">
+									<div class="clock__hourse">Hours</div>
+									<div class="clock__minutes">Minutes</div>
+									<div class="clock__seconds">Seconds</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section class="page__how-works how-works">
+				<div class="how-works__container">
+					<h2 data-watch data-watch-threshold="0.3" class="how-works__title title">How it works</h2>
+					<div data-watch data-watch-threshold="0.3" class="how-works__subtitle subtitle">Find out how to get started</div>
+					<div class="how-works__body">
+						<a href="" class="how-works__columns">
+							<div class="how-works__img-ibg">
+								<picture><source srcset="img/works/1.webp" type="image/webp"><img src="img/works/1.png" alt=""></picture>
+							</div>
+							<div class="how-works__text text-column">
+								<h4 class="text-column__title">Setup Your wallet</h4>
+								<div class="text-column__options">
+									<p>Set up your wallet of choice. Connect it to the Animarket by clicking the wallet icon in the top right corner.</p>
+								</div>
+							</div>
+						</a>
+						<a href="" class="how-works__columns">
+							<div class="how-works__img-ibg">
+								<picture><source srcset="img/works/2.webp" type="image/webp"><img src="img/works/2.png" alt=""></picture>
+							</div>
+							<div class="how-works__text text-column">
+								<h4 class="text-column__title">Create Collection</h4>
+								<div class="text-column__options">
+									<p>Upload your work and setup your collection. Add a description, social links and floor price.</p>
+								</div>
+							</div>
+						</a>
+						<a href="" class="how-works__columns">
+							<div class="how-works__img-ibg">
+								<picture><source srcset="img/works/3.webp" type="image/webp"><img src="img/works/3.png" alt=""></picture>
+							</div>
+							<div class="how-works__text text-column">
+								<h4 class="text-column__title">Start Earning</h4>
+								<div class="text-column__options">
+									<p>Choose between auctions and fixed-price listings. Start earning by selling your NFTs or trading others. </p>
+								</div>
+							</div>
+						</a>
+					</div>
+				</div>
+			</section>
+			<section class="page__digest digest">
+				<div class="digest__container">
+					<div class="digest__inner">
+						<div class="digest__img-ibg">
+							<picture><source srcset="img/weekly.webp" type="image/webp"><img src="img/weekly.png" alt=""></picture>
+						</div>
+						<div class="digest__body">
+							<h2 data-watch data-watch-threshold="0.3" data-watch-once class="digest__title title">Join our weekly digest</h2>
+							<div data-watch data-watch-threshold="0.3" data-watch-once class="digest__subtitle subtitle">Get exclusive promotions & updates straight to your inbox.</div>
+							<form action="#" class="digest__form form">
+								<div class="form__input">
+									<input required autocomplete="off" type="email" placeholder="Enter your email here">
+								</div>
+								<div class="form__btn">
+									<button type="submit" class="_icon-envelope">Subscribe</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+		<footer class="footer">
+			<div class="footer__container">
+				<div class="footer__body">
+					<div class="footer__column column-community">
+						<a href="" class="column-community__logo">
+							<img src="img/icons/logo.svg" alt="logo">
+						</a>
+						<div class="column-community__text">
+							<p>NFT marketplace UI created with Anima for Figma.</p>
+							<p>Join our community</p>
+						</div>
+						<div class="column-community__social">
+							<a href="" class="column-community__link">
+								<img src="img/icons/discord.svg" alt="">
+							</a>
+							<a href="" class="column-community__link">
+								<img src="img/icons/youtube.svg" alt="">
+							</a>
+							<a href="" class="column-community__link">
+								<img src="img/icons/twitter.svg" alt="">
+							</a>
+							<a href="" class="column-community__link">
+								<img src="img/icons/instagram.svg" alt="">
+							</a>
+						</div>
+					</div>
+					<div class="footer__column column-explore">
+						<h4 class="column-explore__title">Explore</h4>
+						<div class="column-explore__body">
+							<a href="" class="column-explore__link">Marketplace</a>
+							<a href="" class="column-explore__link">Rankings</a>
+							<a href="" class="column-explore__link">Connect a wallet</a>
+						</div>
+					</div>
+					<div class="footer__column column-join">
+						<h4 class="column-join__title">Join our weekly digest</h4>
+						<div class="column-join__text">
+							<p>Get exclusive promotions & updates straight to your inbox.</p>
+						</div>
+						<form action="#" class="footer__column footer-form">
+							<div class="footer-form__input">
+								<input required autocomplete="off" type="email" placeholder="Enter your email here">
+							</div>
+							<div class="footer-form__btn">
+								<button type="submit" class="_icon-envelope">Subscribe</button>
+							</div>
+						</form>
+					</div>
+				</div>
+				<div class="footer__copy">
+					<p>Ⓒ NFT Market. Use this template freely.</p>
+				</div>
+			</div>
+		</footer>
+	</div>
+	<script data-main-script src="js/app.min.js?_v=20230212144858"></script>
+</body>
+
+</html>

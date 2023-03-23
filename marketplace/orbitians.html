@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Orbitians</title>
+	<meta charset="UTF-8">
+	<meta name="format-detection" content="telephone=no">
+	<!-- <style>body{opacity: 0;}</style> -->
+	<link rel="stylesheet" href="css/style.min.css?_v=20230212144858">
+	<link rel="shortcut icon" href="favicon.ico">
+	<!-- <meta name="robots" content="noindex, nofollow"> -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Стили для прелоадера -->
+	<style class="preloader-style">
+		.preloader {
+			pointer-events: none;
+			z-index: 1000;
+			position: fixed;
+			width: 100vw;
+			height: 100vh;
+			top: 0;
+			left: 0;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			background: linear-gradient(45deg, rgb(21, 19, 21) 10%, rgb(90, 43, 96) 100%);
+		}
+
+		.preloader * {
+			box-sizing: border-box;
+		}
+
+		.preloader__body {
+			padding: 0.93rem;
+			display: flex;
+			flex-direction: column;
+			position: relative;
+			width: 280px;
+			height: 280px;
+		}
+
+		.preloader__one,
+		.preloader__two {
+			position: absolute;
+			width: 175px;
+			height: 175px;
+			border-radius: 50%;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			margin: auto;
+		}
+
+		.preloader__one {
+			animation: spin1 2.3s infinite linear;
+		}
+
+		.preloader__two {
+			/* transform: rotate(45deg); */
+			animation: spin2 2.3s infinite linear;
+		}
+
+		.preloader__one_one,
+		.preloader__two_five {
+			border-top: 5px solid transparent;
+		}
+
+		.preloader__one_two,
+		.preloader__two_six {
+			border-right: 5px solid transparent;
+		}
+
+		.preloader__one_three,
+		.preloader__two_seven {
+			border-bottom: 5px solid transparent;
+		}
+
+		.preloader__one_four,
+		.preloader__two_eight {
+			border-left: 5px solid transparent;
+		}
+
+		.preloader__one_one {
+			top: -100px;
+		}
+
+		.preloader__one_two {
+			right: -100px;
+		}
+
+		.preloader__one_three {
+			bottom: -100px;
+		}
+
+		.preloader__one_four {
+			left: -100px;
+		}
+
+		.preloader__two_five {
+			right: -100px;
+			bottom: 100px;
+		}
+
+		.preloader__two_six {
+			left: 100px;
+			top: 100px;
+		}
+
+		.preloader__two_seven {
+			left: 100px;
+			top: 100px;
+		}
+
+		.preloader__two_eight {
+			right: 100px;
+			top: 100px;
+		}
+
+		@keyframes spin1 {
+			from {
+				transform: rotate(0deg);
+			}
+
+			to {
+				transform: rotate(360deg);
+			}
+
+			0% {
+				border-color: #968fa4;
+			}
+
+			50% {
+				border-color: #927aaa1d;
+			}
+
+			100% {
+				border-color: #817892;
+			}
+		}
+
+		@keyframes spin2 {
+			from {
+				transform: rotate(360deg);
+			}
+
+			to {
+				transform: rotate(0deg);
+			}
+
+			0% {
+				border-color: #321d5e;
+			}
+
+			50% {
+				border-color: #927aaa1d;
+			}
+
+			100% {
+				border-color: #442f6f;
+			}
+		}
+
+		.preloader__counter {
+			font-size: 35px;
+			position: absolute;
+			font-weight: 900;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			color: rgb(0, 0, 0);
+			z-index: 2222222;
+			font-family: sans-serif;
+		}
+
+		.preloader__line span {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			height: 3px;
+			background-color: rgba(67, 9, 85, 0.516);
+			border-radius: 25px;
+			transition: width 0.3s ease 0s;
+		}
+
+
+		.lock body {
+			overflow: hidden;
+			touch-action: none;
+			overscroll-behavior: none;
+		}
+
+		.wrapper {
+			opacity: 0;
+			visibility: hidden;
+		}
+
+		.loading .preloader {
+			opacity: 1;
+			visibility: visible;
+		}
+
+		.loaded .preloader {
+			opacity: 0;
+			visibility: hidden;
+			transition: all 0.5s ease 0s;
+		}
+
+		.loaded .wrapper {
+			transition: opacity 0.5s ease 0s;
+			opacity: 1;
+			visibility: visible;
+		}
+	</style>
+	<!-- Скрипт прелоадера -->
+	<script id="preloader">
+		(function() {
+			const preloaderContainer = document.querySelector('#preloader');
+			let preloader, preloaderBody, showPecentLoad, showLineLoad;
+			const htmlDocument = document.documentElement;
+			const settings = {
+				// Задержка перед удалением прелоадера из html после окончания загрузки
+				delayRemovePreloader: 500,
+				// Функціонал відсоткового відображення завантаження
+				counter: true,
+				// Функционал процентного отображения загрузки
+				line: false,
+				// Функционал кастомного отображения разных элементов (можно редактировать) – для включения перевести init в позицию true.
+				custom: {
+					init: true,
+					// Элементы, которые нужно добавлять в preloader__body
+					body: `
+							<div class="preloader__one preloader__one_one"></div>
+							<div class="preloader__one preloader__one_two"></div>
+							<div class="preloader__one preloader__one_three"></div>
+							<div class="preloader__one preloader__one_four"></div>
+							<div class="preloader__two preloader__two_five"></div>
+							<div class="preloader__two preloader__two_six"></div>
+							<div class="preloader__two preloader__two_seven"></div>
+							<div class="preloader__two preloader__two_eight"></div>
+							`
+				},
+			};
+			const checkBodyinterval = setInterval(() => {
+				if (document.body) {
+					clearInterval(checkBodyinterval);
+					const preloaderTemplate = `
+								<div class="preloader">
+									<div class="preloader__body">
+										${settings.custom.init ? settings.custom.body : ''}
+										${settings.counter ? '<div class="preloader__counter">0%</div>' : ''}
+										${settings.line ? '<div class="preloader__line"><span></span></div>' : ''}
+									</div>
+								</div>
+							`;
+					htmlDocument.insertAdjacentHTML("beforeend", preloaderTemplate);
+					preloader = document.querySelector('.preloader');
+					preloaderBody = preloader.querySelector('.preloader__body');
+					showPecentLoad = document.querySelector('.preloader__counter');
+					showLineLoad = document.querySelector('.preloader__line span');
+				}
+			}, 10);
+			const checkScriptsInterval = setInterval(() => {
+				const mainScriptsTag = document.querySelector('[data-main-script]');
+				if (mainScriptsTag) {
+					clearInterval(checkScriptsInterval);
+					let preloaderImages = document.querySelectorAll('img');
+					const preloaderStyle = document.querySelector('.preloader-style');
+					if (preloaderImages.length) {
+						const intervalDelayCuonter = 4 * preloaderImages.length < 40 ? 4 * preloaderImages.length : 40;
+						let imagesLoadedCount = counter = progress = 0;
+						htmlDocument.classList.add('loading');
+						htmlDocument.classList.add('lock');
+						window.addEventListener("load", () => htmlDocument.classList.add('download-done'));
+						preloaderImages.forEach(preloaderImage => {
+							const imgClone = document.createElement('img');
+							if (imgClone) {
+								imgClone.onload = imageLoaded;
+								imgClone.onerror = imageLoaded;
+								preloaderImage.dataset.src ? imgClone.src = preloaderImage.dataset.src : imgClone.src = preloaderImage.src;
+							}
+						});
+
+						function setValueProgress(progress) {
+							showPecentLoad ? showPecentLoad.innerText = `${progress}%` : null;
+							showLineLoad ? showLineLoad.style.width = `${progress}%` : null;
+						}
+						showPecentLoad ? setValueProgress(progress) : null;
+
+						function imageLoaded() {
+							imagesLoadedCount++;
+							progress = Math.round((100 / preloaderImages.length) * imagesLoadedCount);
+							const intervalId = setInterval(() => {
+								counter >= progress ? clearInterval(intervalId) : setValueProgress(++counter);
+								counter >= 100 ? addLoadedClass() : null;
+							}, intervalDelayCuonter);
+						}
+
+						function addLoadedClass() {
+							if (this.isRun == true) return;
+							this.isRun = true;
+
+							let timer = setInterval(() => {
+								if (htmlDocument.closest('.download-done')) {
+									htmlDocument.classList.remove('lock');
+									htmlDocument.classList.remove('loading');
+									setTimeout(() => {
+										htmlDocument.classList.remove('download-done');
+										htmlDocument.classList.add('loaded');
+									}, settings.delayRemovePreloader >= 500 ? settings.delayRemovePreloader - 500 : 0);
+									const intervalRemovePreloader = setInterval(() => {
+										preloader.remove();
+										if (preloaderStyle) {
+											preloaderStyle.remove();
+										}
+										clearInterval(intervalRemovePreloader);
+										clearInterval(timer);
+										preloaderContainer.remove();
+										mainScriptsTag.removeAttribute('data-main-script');
+									}, settings.delayRemovePreloader);
+								} else {
+									return;
+								}
+							}, 300);
+						}
+					} else {
+						if (preloaderStyle) {
+							preloaderStyle.remove();
+						}
+						preloaderContainer.remove();
+					}
+				}
+			}, 10);
+		})();
+	</script>
+</head>
+
+<body data-custom-cursor="">
+	<div class="wrapper">
+		<header class="header">
+			<div class="header__inner">
+				<div class="header__body">
+					<a href="index.html" class="header__logo">
+						<img src="img/icons/logo.svg" alt="logo">
+					</a>
+					<div class="header__menu menu">
+						<nav class="menu__body">
+							<ul class="menu__list">
+								<li class="menu__item"><a href="index.html" class="menu__link">Marketplace</a></li>
+								<li class="menu__item"><a href="rankings.html" class="menu__link">Rankings</a></li>
+								<li class="menu__item"><a href="connect.html" class="menu__link">Connect a wallet</a></li>
+							</ul>
+						</nav>
+					</div>
+					<a data-da=".menu__list,840" href="form.html" class="header__btn _icon-user">Sign Up</a>
+					<button type="button" class="header__icon icon-menu"><span></span></button>
+				</div>
+			</div>
+		</header>
+
+		<main class="page">
+			<div class="page__background background">
+				<div class="background__img-ibg">
+					<picture><source srcset="img/bgorbitians.webp" type="image/webp"><img src="img/bgorbitians.jpg" alt="background"></picture>
+				</div>
+			</div>
+			<section class="page__orbitians orbitians">
+				<div class="orbitians__container">
+					<div class="orbitians__inner">
+						<div class="orbitians__column orbitians__column--1">
+							<div class="orbitians__row row-title">
+								<h1 class="row-title__title">The Orbitians</h1>
+								<div class="row-title__subtitle">Minted on Sep 30, 2022</div>
+							</div>
+							<div class="orbitians__row row-avatar">
+								<div class="row-avatar__name">Created By</div>
+								<a href="#" class="row-avatar__logo">
+									<picture><source srcset="img/avatar/9.webp" type="image/webp"><img src="img/avatar/9.png" alt="imadges"></picture> Orbitian
+								</a>
+							</div>
+							<div class="orbitians__row row-text">
+								<h4 class="row-text__title">Description</h4>
+								<div class="row-text__body">
+									<p>The Orbitians
+										is a collection of 10,000 unique NFTs on the Ethereum blockchain,</p>
+									<p>There are all sorts of beings in the NFT Universe. The most advanced and friendly of the bunch are Orbitians. They live in a metal space machines, high up in the sky and only have one foot on Earth.</p>
+									<p>These Orbitians are a peaceful race, but they have been at war with a group of invaders for many generations. The invaders are called Upside-Downs, because of their inverted bodies that live on the ground, yet do not know any other way to be. Upside-Downs believe that they will be able to win this war if they could only get an eye into Orbitian territory, so they've taken to make human beings their target.</p>
+								</div>
+							</div>
+							<div class="orbitians__row row-details">
+								<h4 class="row-details__title">Details</h4>
+								<div class="row-details__body">
+									<a href="" class="row-details__link _icon-globe">View on Etherscan</a>
+									<a href="" class="row-details__link _icon-globe">View Original</a>
+								</div>
+							</div>
+							<div class="orbitians__row row-tags">
+								<h4 class="row-tags__title">Tags</h4>
+								<div class="row-tags__body">
+									<a href="" class="row-tags__link">Animation</a>
+									<a href="" class="row-tags__link">illustration</a>
+									<a href="" class="row-tags__link">moon</a>
+									<a href="" class="row-tags__link">moon</a>
+								</div>
+							</div>
+						</div>
+						<div data-da=".row-title,700" class="orbitians__column orbitians__column--2 clock">
+							<div class="clock__body">
+								<div class="clock__text">Auction ends in:</div>
+								<div class="clock__num" id="clock"></div>
+								<div class="clock__column">
+									<div class="clock__hourse">Hours</div>
+									<div class="clock__minutes">Minutes</div>
+									<div class="clock__seconds">Seconds</div>
+								</div>
+								<div class="clock__btn">
+									<a href="" class="clock__link">Place Bid</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section class="page__artist artist">
+				<div class="artist__container">
+					<div data-watch data-watch-threshold="0.3" class="artist__header header-block">
+						<div class="header-block__text">
+							<h2 data-watch data-watch-threshold="0.3" class="header-block__title title">More from this artist</h2>
+						</div>
+						<div data-da=".artist__cards,700" class="header-block__btn">
+							<a href="created.html" class="header-block__link _icon-arrowright">Go To Artist Page</a>
+						</div>
+					</div>
+					<div class="artist__cards all-card">
+						<div class="all-card__body">
+							<div class="all-card__inner item-all">
+								<div class="item-all__cards item-all__cards--background-color">
+									<div class="item-all__img-ibg">
+										<picture><source srcset="img/all-card/19.webp" type="image/webp"><img src="img/all-card/19.png" alt="more"></picture>
+									</div>
+									<div class="item-all__inner">
+										<div class="item-all__name avatar-discover">
+											<div class="avatar-discover__text">
+												<p>Foxy Life</p>
+											</div>
+											<div class="avatar-discover__ava">
+												<a href="#" class="avatar-discover__logo">
+													<picture><source srcset="img/avatar/9.webp" type="image/webp"><img src="img/avatar/9.png" alt="imadges-discover"></picture>
+												</a>
+												<div class="avatar-discover__name">Orbitian</div>
+											</div>
+										</div>
+										<div class="item-all__total total">
+											<div class="total__body">
+												<div class="total__sale">Price</div>
+												<div class="total__num">1.63 ETH</div>
+											</div>
+											<div class="total__body">
+												<div class="total__sale">Highest Bid</div>
+												<div class="total__num">0.33 wETH</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="item-all__cards item-all__cards--background-color">
+									<div class="item-all__img-ibg">
+										<picture><source srcset="img/all-card/20.webp" type="image/webp"><img src="img/all-card/20.png" alt="more"></picture>
+									</div>
+									<div class="item-all__inner">
+										<div class="item-all__name avatar-discover">
+											<div class="avatar-discover__text">
+												<p>Cat from future</p>
+											</div>
+											<div class="avatar-discover__ava">
+												<a href="#" class="avatar-discover__logo">
+													<picture><source srcset="img/avatar/9.webp" type="image/webp"><img src="img/avatar/9.png" alt="imadges-discover"></picture>
+												</a>
+												<div class="avatar-discover__name">Orbitian</div>
+											</div>
+										</div>
+										<div class="item-all__total total">
+											<div class="total__body">
+												<div class="total__sale">Price</div>
+												<div class="total__num">1.63 ETH</div>
+											</div>
+											<div class="total__body">
+												<div class="total__sale">Highest Bid</div>
+												<div class="total__num">0.33 wETH</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="item-all__cards item-all__cards--2 item-all__cards--background-color">
+									<div class="item-all__img-ibg">
+										<picture><source srcset="img/all-card/21.webp" type="image/webp"><img src="img/all-card/21.png" alt="more"></picture>
+									</div>
+									<div class="item-all__inner">
+										<div class="item-all__name avatar-discover">
+											<div class="avatar-discover__text">
+												<p>Psycho Dog</p>
+											</div>
+											<div class="avatar-discover__ava">
+												<a href="#" class="avatar-discover__logo">
+													<picture><source srcset="img/avatar/9.webp" type="image/webp"><img src="img/avatar/9.png" alt="imadges-discover"></picture>
+												</a>
+												<div class="avatar-discover__name">Orbitian</div>
+											</div>
+										</div>
+										<div class="item-all__total total">
+											<div class="total__body">
+												<div class="total__sale">Price</div>
+												<div class="total__num">1.63 ETH</div>
+											</div>
+											<div class="total__body">
+												<div class="total__sale">Highest Bid</div>
+												<div class="total__num">0.33 wETH</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="item-all__cards item-all__cards--2 item-all__cards--background-color">
+									<div class="item-all__img-ibg">
+										<picture><source srcset="img/all-card/13.webp" type="image/webp"><img src="img/all-card/13.png" alt="more"></picture>
+									</div>
+									<div class="item-all__inner">
+										<div class="item-all__name avatar-discover">
+											<div class="avatar-discover__text">
+												<p>Designer Bear</p>
+											</div>
+											<div class="avatar-discover__ava">
+												<a href="#" class="avatar-discover__logo">
+													<picture><source srcset="img/avatar/9.webp" type="image/webp"><img src="img/avatar/9.png" alt="imadges-discover"></picture>
+												</a>
+												<div class="avatar-discover__name">Orbitian</div>
+											</div>
+										</div>
+										<div class="item-all__total total">
+											<div class="total__body">
+												<div class="total__sale">Price</div>
+												<div class="total__num">1.63 ETH</div>
+											</div>
+											<div class="total__body">
+												<div class="total__sale">Highest Bid</div>
+												<div class="total__num">0.33 wETH</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="item-all__cards item-all__cards--2 item-all__cards--background-color">
+									<div class="item-all__img-ibg">
+										<picture><source srcset="img/all-card/22.webp" type="image/webp"><img src="img/all-card/22.png" alt="more"></picture>
+									</div>
+									<div class="item-all__inner">
+										<div class="item-all__name avatar-discover">
+											<div class="avatar-discover__text">
+												<p>Dancing Robot 0375</p>
+											</div>
+											<div class="avatar-discover__ava">
+												<a href="#" class="avatar-discover__logo">
+													<picture><source srcset="img/avatar/9.webp" type="image/webp"><img src="img/avatar/9.png" alt="imadges-discover"></picture>
+												</a>
+												<div class="avatar-discover__name">Dancing Robot 0375</div>
+											</div>
+										</div>
+										<div class="item-all__total total">
+											<div class="total__body">
+												<div class="total__sale">Price</div>
+												<div class="total__num">1.63 ETH</div>
+											</div>
+											<div class="total__body">
+												<div class="total__sale">Highest Bid</div>
+												<div class="total__num">0.33 wETH</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="item-all__cards item-all__cards--2 item-all__cards--background-color">
+									<div class="item-all__img-ibg">
+										<picture><source srcset="img/all-card/8.webp" type="image/webp"><img src="img/all-card/8.png" alt="more"></picture>
+									</div>
+									<div class="item-all__inner">
+										<div class="item-all__name avatar-discover">
+											<div class="avatar-discover__text">
+												<p>Dancing Robot 0356</p>
+											</div>
+											<div class="avatar-discover__ava">
+												<a href="#" class="avatar-discover__logo">
+													<picture><source srcset="img/avatar/9.webp" type="image/webp"><img src="img/avatar/9.png" alt="imadges-discover"></picture>
+												</a>
+												<div class="avatar-discover__name">Orbitian</div>
+											</div>
+										</div>
+										<div class="item-all__total total">
+											<div class="total__body">
+												<div class="total__sale">Price</div>
+												<div class="total__num">1.63 ETH</div>
+											</div>
+											<div class="total__body">
+												<div class="total__sale">Highest Bid</div>
+												<div class="total__num">0.33 wETH</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="item-all__cards item-all__cards--1 item-all__cards--background-color">
+									<div class="item-all__img-ibg">
+										<picture><source srcset="img/all-card/23.webp" type="image/webp"><img src="img/all-card/23.png" alt="more"></picture>
+									</div>
+									<div class="item-all__inner">
+										<div class="item-all__name avatar-discover">
+											<div class="avatar-discover__text">
+												<p>Dancing Robot 0321</p>
+											</div>
+											<div class="avatar-discover__ava">
+												<a href="#" class="avatar-discover__logo">
+													<picture><source srcset="img/avatar/9.webp" type="image/webp"><img src="img/avatar/9.png" alt="imadges-discover"></picture>
+												</a>
+												<div class="avatar-discover__name">Orbitian</div>
+											</div>
+										</div>
+										<div class="item-all__total total">
+											<div class="total__body">
+												<div class="total__sale">Price</div>
+												<div class="total__num">1.63 ETH</div>
+											</div>
+											<div class="total__body">
+												<div class="total__sale">Highest Bid</div>
+												<div class="total__num">0.33 wETH</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="item-all__cards item-all__cards--1 item-all__cards--background-color">
+									<div class="item-all__img-ibg">
+										<picture><source srcset="img/all-card/24.webp" type="image/webp"><img src="img/all-card/24.png" alt="more"></picture>
+									</div>
+									<div class="item-all__inner">
+										<div class="item-all__name avatar-discover">
+											<div class="avatar-discover__text">
+												<p>Dancing Robot 0512</p>
+											</div>
+											<div class="avatar-discover__ava">
+												<a href="#" class="avatar-discover__logo">
+													<picture><source srcset="img/avatar/9.webp" type="image/webp"><img src="img/avatar/9.png" alt="imadges-discover"></picture>
+												</a>
+												<div class="avatar-discover__name">Orbitian</div>
+											</div>
+										</div>
+										<div class="item-all__total total">
+											<div class="total__body">
+												<div class="total__sale">Price</div>
+												<div class="total__num">1.63 ETH</div>
+											</div>
+											<div class="total__body">
+												<div class="total__sale">Highest Bid</div>
+												<div class="total__num">0.33 wETH</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="item-all__cards item-all__cards--1 item-all__cards--background-color">
+									<div class="item-all__img-ibg">
+										<picture><source srcset="img/all-card/25.webp" type="image/webp"><img src="img/all-card/25.png" alt="more"></picture>
+									</div>
+									<div class="item-all__inner">
+										<div class="item-all__name avatar-discover">
+											<div class="avatar-discover__text">
+												<p>Dancing Robot 0024</p>
+											</div>
+											<div class="avatar-discover__ava">
+												<a href="#" class="avatar-discover__logo">
+													<picture><source srcset="img/avatar/9.webp" type="image/webp"><img src="img/avatar/9.png" alt="imadges-discover"></picture>
+												</a>
+												<div class="avatar-discover__name">Orbitian</div>
+											</div>
+										</div>
+										<div class="item-all__total total">
+											<div class="total__body">
+												<div class="total__sale">Price</div>
+												<div class="total__num">1.63 ETH</div>
+											</div>
+											<div class="total__body">
+												<div class="total__sale">Highest Bid</div>
+												<div class="total__num">0.33 wETH</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+		<footer class="footer">
+			<div class="footer__container">
+				<div class="footer__body">
+					<div class="footer__column column-community">
+						<a href="" class="column-community__logo">
+							<img src="img/icons/logo.svg" alt="logo">
+						</a>
+						<div class="column-community__text">
+							<p>NFT marketplace UI created with Anima for Figma.</p>
+							<p>Join our community</p>
+						</div>
+						<div class="column-community__social">
+							<a href="" class="column-community__link">
+								<img src="img/icons/discord.svg" alt="">
+							</a>
+							<a href="" class="column-community__link">
+								<img src="img/icons/youtube.svg" alt="">
+							</a>
+							<a href="" class="column-community__link">
+								<img src="img/icons/twitter.svg" alt="">
+							</a>
+							<a href="" class="column-community__link">
+								<img src="img/icons/instagram.svg" alt="">
+							</a>
+						</div>
+					</div>
+					<div class="footer__column column-explore">
+						<h4 class="column-explore__title">Explore</h4>
+						<div class="column-explore__body">
+							<a href="" class="column-explore__link">Marketplace</a>
+							<a href="" class="column-explore__link">Rankings</a>
+							<a href="" class="column-explore__link">Connect a wallet</a>
+						</div>
+					</div>
+					<div class="footer__column column-join">
+						<h4 class="column-join__title">Join our weekly digest</h4>
+						<div class="column-join__text">
+							<p>Get exclusive promotions & updates straight to your inbox.</p>
+						</div>
+						<form action="#" class="footer__column footer-form">
+							<div class="footer-form__input">
+								<input required autocomplete="off" type="email" placeholder="Enter your email here">
+							</div>
+							<div class="footer-form__btn">
+								<button type="submit" class="_icon-envelope">Subscribe</button>
+							</div>
+						</form>
+					</div>
+				</div>
+				<div class="footer__copy">
+					<p>Ⓒ NFT Market. Use this template freely.</p>
+				</div>
+			</div>
+		</footer>
+	</div>
+	<script data-main-script src="js/app.min.js?_v=20230212144858"></script>
+</body>
+
+</html>
